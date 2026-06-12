@@ -1,0 +1,28 @@
+version: 0.2
+
+env:
+  parameter-store:
+    DOCKER_REGISTRY_USERNAME: /myapp/docker-credentials/username
+    DOCKER_REGISTRY_PASSWORD: /myapp/docker-credentials/password
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+
+  pre_build:
+    commands:
+      - echo "Logging in to Docker Hub..."
+      - echo $DOCKER_REGISTRY_PASSWORD | docker login -u $DOCKER_REGISTRY_USERNAME --password-stdin
+      - pip install -r CICD/sample-python-app/requirements.txt
+
+  build:
+    commands:
+      - cd CICD/sample-python-app
+      - echo "Building Docker image..."
+      - docker build -t vishwa1027/sample-python-flask-app:latest .
+      - docker push vishwa1027/sample-python-flask-app:latest
+
+  post_build:
+    commands:
+      - echo "Build completed successfully"
